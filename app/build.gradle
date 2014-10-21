@@ -1,0 +1,42 @@
+apply plugin: 'com.android.application'
+apply plugin: "robolectric"
+
+android {
+    compileSdkVersion 20
+    buildToolsVersion "20.0.0"
+
+    defaultConfig {
+        applicationId "com.example.murrayking.myweather"
+        minSdkVersion 10
+        targetSdkVersion 19
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            runProguard false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+robolectric {
+    include "**/robolectric/**/*Test.class"
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+
+    androidTestCompile("org.robolectric:robolectric:2.3") {
+        exclude module: "commons-logging"
+        exclude module: "httpclient"
+    }
+    androidTestCompile "junit:junit:4.11" // use junit 4 for testing
+    // add the stripped version of android.jar
+    androidTestCompile files("testlibs/android-18-stripped.jar")
+
+    task copyTestClasses(type: Copy) {
+        from "build/test-classes"
+        into "build/intermediates/classes/debug"
+    }
+    compile 'com.android.support:appcompat-v7:20.0.0'
+}
