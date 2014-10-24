@@ -1,7 +1,9 @@
 package com.example.murrayking.myweather;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.view.Menu;
 import android.view.MenuItem;
 
 
@@ -19,6 +21,12 @@ public class MainActivity extends ActionBarActivity {
     }
 
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
 
 
     @Override
@@ -28,10 +36,17 @@ public class MainActivity extends ActionBarActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_settings) {
+            Intent settingActivity = new Intent(this, SettingsActivity.class);
 
+            //detailIntent.putExtra(ROUTE_CHOSEN_KEY, row);
+
+            // TODO: add any other data you'd like as Extras
+
+            // start the next Activity using your prepared Intent
+            startActivity(settingActivity);
             return true;
         }
-        return false;
+        return super.onOptionsItemSelected(item);
     }
 
 

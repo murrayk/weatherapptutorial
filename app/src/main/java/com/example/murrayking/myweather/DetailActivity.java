@@ -1,5 +1,6 @@
 package com.example.murrayking.myweather;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
@@ -33,6 +34,8 @@ public class DetailActivity extends ActionBarActivity {
         return true;
     }
 
+
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -40,6 +43,10 @@ public class DetailActivity extends ActionBarActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_settings) {
+
+                 Intent settingActivity = new Intent(this, SettingsActivity.class);
+
+                startActivity(settingActivity);
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -65,9 +72,14 @@ public class DetailActivity extends ActionBarActivity {
                 Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
 
-            textView = (TextView)rootView.findViewById(R.id.weatherTextView);
-            String weather = getActivity().getIntent().getExtras().get(ForecastFragment.WEATHER_KEY).toString();
-            textView.setText(weather);
+
+            Intent intent = getActivity().getIntent();
+            if(intent != null && intent.hasExtra(Intent.EXTRA_INTENT)){
+                textView = (TextView)rootView.findViewById(R.id.weatherTextView);
+                String weather = intent.getStringExtra(Intent.EXTRA_INTENT);
+                textView.setText(weather);
+            }
+
             return rootView;
         }
     }

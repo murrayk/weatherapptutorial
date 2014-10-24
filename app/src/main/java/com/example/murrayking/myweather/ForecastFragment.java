@@ -1,9 +1,11 @@
 package com.example.murrayking.myweather;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -66,14 +68,11 @@ public class ForecastFragment extends Fragment {
         // These two need to be declared outside the try/catch
 // so that they can be closed in the finally block.
 
-        String url = "http://api.openweathermap.org/data/2.5/forecast/daily?q=94043&mode=json&units=metric&cnt=7";
 
         //new FetchWeatherTask().execute(url);
 
-        String[] weekForecast = new String[]{"1", "2", "3"};
-        ArrayList<String> week = new ArrayList<String>(Arrays.asList(weekForecast));
         arrayAdapter = new ArrayAdapter<String>(getActivity(),
-                R.layout.list_item_forecast, R.id.list_item_forecast_textview, week);
+                R.layout.list_item_forecast, R.id.list_item_forecast_textview, new ArrayList<String>());
         ListView listView = (ListView)rootView.findViewById(R.id.listViewForecast);
         listView.setAdapter(arrayAdapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -81,7 +80,7 @@ public class ForecastFragment extends Fragment {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Toast.makeText(getActivity(), "this is my Toast message!!! =)" + arrayAdapter.getItem(i),
                         Toast.LENGTH_LONG).show();
-                Intent detailIntent = new Intent(getActivity(), DetailActivity.class).putExtra(WEATHER_KEY, arrayAdapter.getItem(i));
+                Intent detailIntent = new Intent(getActivity(), DetailActivity.class).putExtra(Intent.EXTRA_INTENT, arrayAdapter.getItem(i));
 
                 //detailIntent.putExtra(ROUTE_CHOSEN_KEY, row);
 
@@ -113,8 +112,21 @@ public class ForecastFragment extends Fragment {
         }
 
         @Override
-        protected String[] doInBackground(String ... urlVarArg) {
+        protected String[] doInBackground(String ... locations) {
 
+            String location = locations[0];
+            Uri.Builder builder = new Uri.Builder();
+            builder.scheme("http").authority("api.openweathermap.org")
+                    .appendPath("data")
+                    .appendPath("2.5")
+                    .appendPath("forecast")
+                    .appendPath("daily")
+                    .appendQueryParameter("q", location)
+                    .appendQueryParameter("mode", "json")
+                    .appendQueryParameter("units","metric")
+                    .appendQueryParameter("cnt", "7");
+
+            Uri uri= builder.build();
 
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
@@ -126,7 +138,7 @@ public class ForecastFragment extends Fragment {
                 // Construct the URL for the OpenWeatherMap query
                 // Possible parameters are available at OWM's forecast API page, at
                 // http://openweathermap.org/API#forecast
-                URL url = new URL(urlVarArg[0]);
+                URL url = new URL(uri.toString());
                 // Create the request to OpenWeatherMap, and open the connection
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
@@ -188,30 +200,24 @@ public class ForecastFragment extends Fragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+
+
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
+        String location = sharedPref.getString(getString(R.string.pref_location_key), getString(R.string.pref_location_default));
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         //q=94043&mode=json&units=metric&cnt=7
-        Uri.Builder builder = new Uri.Builder();
-        builder.scheme("http").authority("api.openweathermap.org")
-                .appendPath("data")
-                .appendPath("2.5")
-                .appendPath("forecast")
-                .appendPath("daily")
-                .appendQueryParameter("q", "94043")
-                .appendQueryParameter("mode", "json")
-                .appendQueryParameter("units","metric")
-                .appendQueryParameter("cnt", "7");
 
-        Uri uri= builder.build();
         int id = item.getItemId();
         if (id == R.id.action_refresh) {
             FetchWeatherTask fetchWeatherTask = new FetchWeatherTask();
 
-            fetchWeatherTask.execute(uri.toString());
+            fetchWeatherTask.execute(location);
 
             return true;
         }
+
 
         return super.onOptionsItemSelected(item);
     }
