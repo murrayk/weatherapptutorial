@@ -65,11 +65,9 @@ public class ForecastFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
 
-        // These two need to be declared outside the try/catch
-// so that they can be closed in the finally block.
 
 
-        //new FetchWeatherTask().execute(url);
+
 
         arrayAdapter = new ArrayAdapter<String>(getActivity(),
                 R.layout.list_item_forecast, R.id.list_item_forecast_textview, new ArrayList<String>());
@@ -91,6 +89,8 @@ public class ForecastFragment extends Fragment {
 
             }
         });
+
+        lookupWeather();
         return rootView;
     }
 
@@ -187,7 +187,7 @@ public class ForecastFragment extends Fragment {
             }
 
             String[] weather = new String[]{};
-            WeatherDataParser weatherDataParser = new WeatherDataParser();
+            WeatherDataParser weatherDataParser = new WeatherDataParser(getActivity());
             try {
                 weather =weatherDataParser.getWeatherDataFromJson(forecastJsonStr, 7);
             } catch (JSONException e) {
@@ -202,8 +202,7 @@ public class ForecastFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
 
 
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
-        String location = sharedPref.getString(getString(R.string.pref_location_key), getString(R.string.pref_location_default));
+
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
@@ -211,14 +210,20 @@ public class ForecastFragment extends Fragment {
 
         int id = item.getItemId();
         if (id == R.id.action_refresh) {
-            FetchWeatherTask fetchWeatherTask = new FetchWeatherTask();
-
-            fetchWeatherTask.execute(location);
+            lookupWeather();
 
             return true;
         }
 
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void lookupWeather() {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
+        String location = sharedPref.getString(getString(R.string.pref_location_key), getString(R.string.pref_location_default));
+        FetchWeatherTask fetchWeatherTask = new FetchWeatherTask();
+
+        fetchWeatherTask.execute(location);
     }
 }

@@ -1,5 +1,9 @@
 package com.example.murrayking.myweather;
 
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+import android.support.v4.app.FragmentActivity;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -11,9 +15,15 @@ import java.util.Date;
  * Created by murrayking on 07/10/2014.
  */
 public class WeatherDataParser {
+
+    FragmentActivity activity;
+    public WeatherDataParser(FragmentActivity activity) {
+        this.activity = activity;
+    }
+
     /* The date/time conversion code is going to be moved outside the asynctask later,
-    * so for convenience we're breaking it out into its own method now.
-    */
+        * so for convenience we're breaking it out into its own method now.
+        */
     private String getReadableDateString(long time){
         // Because the API returns a unix timestamp (measured in seconds),
         // it must be converted to milliseconds in order to be converted to valid date.
@@ -79,8 +89,19 @@ public class WeatherDataParser {
             // Temperatures are in a child object called "temp".  Try not to name variables
             // "temp" when working with temperature.  It confuses everybody.
             JSONObject temperatureObject = dayForecast.getJSONObject(OWM_TEMPERATURE);
+
+            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this.activity);
+            String temperatureUnit  = sharedPref.getString(activity.getString(R.string.pref_temperature_units_key), activity.getString(R.string.pref_temperature_default_default));
+
+
+
             double high = temperatureObject.getDouble(OWM_MAX);
             double low = temperatureObject.getDouble(OWM_MIN);
+
+            if(temperatureUnit.equals("Imperial")){
+                high = convertCtoF(high);
+                low = convertCtoF(low);
+            }
 
             highAndLow = formatHighLows(high, low);
             resultStrs[i] = day + " - " + description + " - " + highAndLow;
@@ -88,5 +109,12 @@ public class WeatherDataParser {
 
         return resultStrs;
     }
+
+    private double convertCtoF(double c){
+        double f = c  * 9/5 + 32 ;
+        return  f;
+
+    }
+
 
 }

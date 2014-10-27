@@ -1,7 +1,10 @@
 package com.example.murrayking.myweather;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -44,6 +47,23 @@ public class MainActivity extends ActionBarActivity {
 
             // start the next Activity using your prepared Intent
             startActivity(settingActivity);
+            return true;
+        }
+
+        if (id == R.id.action_show_on_map) {
+            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+            String geoLocation  = sharedPref.getString(this.getString(R.string.pref_location_key), this.getString(R.string.pref_location_default));
+
+            Uri.Builder builder = new Uri.Builder();
+            builder.scheme("geo")
+                    .appendQueryParameter("q", geoLocation);
+
+            Uri uri= builder.build();
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(uri);
+            if (intent.resolveActivity(getPackageManager()) != null) {
+                startActivity(intent);
+            }
             return true;
         }
         return super.onOptionsItemSelected(item);
