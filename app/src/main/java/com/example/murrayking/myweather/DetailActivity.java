@@ -3,19 +3,22 @@ package com.example.murrayking.myweather;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.ShareActionProvider;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ShareActionProvider;
 import android.widget.TextView;
 
 
 public class DetailActivity extends ActionBarActivity {
 
-    private ShareActionProvider mShareActionProvider;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,7 +26,7 @@ public class DetailActivity extends ActionBarActivity {
         setContentView(R.layout.activity_detail);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new PlaceholderFragment())
+                    .add(R.id.container, new DetailFragment())
                     .commit();
         }
 
@@ -61,16 +64,17 @@ public class DetailActivity extends ActionBarActivity {
     /**
      * A placeholder fragment containing a simple view.
      */
-    public static class PlaceholderFragment extends Fragment {
+    public static class DetailFragment extends Fragment {
 
         private TextView textView;
-
+        private String weatherString;
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
+            setHasOptionsMenu(true);
         }
 
-        public PlaceholderFragment() {
+        public DetailFragment() {
         }
 
         @Override
@@ -84,9 +88,60 @@ public class DetailActivity extends ActionBarActivity {
                 textView = (TextView)rootView.findViewById(R.id.weatherTextView);
                 String weather = intent.getStringExtra(Intent.EXTRA_INTENT);
                 textView.setText(weather);
+                this.weatherString = weather;
             }
+
 
             return rootView;
         }
+
+        @Override
+        public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+
+            inflater.inflate(R.menu.detail_fragment, menu);
+
+
+            MenuItem menuItem = menu.findItem(R.id.action_share);
+
+            ShareActionProvider shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
+
+            if(shareActionProvider != null){
+                shareActionProvider.setShareIntent(createSharedIntent());
+            } else {
+                Log.e("DetailFragment", "not share action provider      ");
+            }
+        }
+
+
+
+        @Override
+        public boolean onOptionsItemSelected(MenuItem item) {
+
+
+
+            // Handle action bar item clicks here. The action bar will
+            // automatically handle clicks on the Home/Up button, so long
+            // as you specify a parent activity in AndroidManifest.xml.
+            //q=94043&mode=json&units=metric&cnt=7
+
+            int id = item.getItemId();
+            if (id == R.id.action_share) {
+
+
+                return true;
+            }
+
+
+            return super.onOptionsItemSelected(item);
+        }
+
+        private Intent createSharedIntent(){
+            Intent sharedIntent = new Intent(Intent.ACTION_SEND);
+            sharedIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+            sharedIntent.setType("text/plain");
+            sharedIntent.putExtra(Intent.EXTRA_TEXT, weatherString);
+            return sharedIntent;
+        }
+
     }
 }
