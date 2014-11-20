@@ -23,8 +23,6 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 
-    androidTestCompile "junit:junit:4.11" // use junit 4 for testing
-
 
     compile 'com.android.support:appcompat-v7:20.0.0'
 }
